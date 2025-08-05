@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <title>Arkiv – AI-Nyheter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: "class" };
+  </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <main class="max-w-3xl mx-auto px-4 py-6">
+    <h1 class="text-2xl font-bold mb-4">Arkiv</h1>
+
+    <div id="list" class="space-y-6"></div>
+
+    <button id="load" class="mt-6 px-4 py-2 rounded bg-indigo-600 text-white">
+      Läs in fler
+    </button>
+  </main>
+
+<script>
+const API   = "https://ai-nyheter-backend.onrender.com/api/archive";
+let page    = 1, per = 40;
+
+async function load() {
+  const r   = await fetch(`${API}?page=${page}&per=${per}`);
+  const arr = await r.json();
+  if (!arr.length) { document.getElementById("load").disabled = true; return; }
+
+  const wrap = document.getElementById("list");
+  arr.forEach(a => {
+    wrap.insertAdjacentHTML("beforeend", `
+      <article class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+        <span class="text-xs py-1 px-2 rounded bg-indigo-600 text-white">${a.category}</span>
+        <h2 class="mt-2 font-semibold">
+          <a href="${a.url}" target="_blank" class="hover:underline">${a.title}</a>
+        </h2>
+        <time class="text-xs text-gray-500">${a.date}</time>
+        <p class="mt-2 text-sm">${a.summary}</p>
+      </article>
+    `);
+  });
+  page++;
+}
+document.getElementById("load").addEventListener("click", load);
+load();            // första laddningen
+</script>
+</body>
+</html>
