@@ -1,10 +1,11 @@
+/* --------------- KONSTANTER --------------- */
 const API = "https://ai-nyheter-backend.onrender.com/api";
 
 const loader   = document.getElementById("loader");
 const newsSec  = document.getElementById("news");
 const alertBox = document.getElementById("alert");
 
-/* ---------- 1. Hämta & visa nyheter ---------- */
+/* --------------- 1. HÄMTA & VISA NYHETER --------------- */
 fetch(`${API}/news`)
   .then(r => r.json())
   .then(renderNews)
@@ -33,14 +34,7 @@ function renderNews(items) {
   newsSec.classList.remove("hidden");
 }
 
- ).join("");
-
-
-  loader.classList.add("hidden");
-  newsSec.classList.remove("hidden");
-}
-
-/* ---------- 2. Ladda kategorier ---------- */
+/* --------------- 2. LADDA KATEGORIER --------------- */
 fetch(`${API}/settings`)
   .then(r => r.json())
   .then(cats => {
@@ -59,7 +53,7 @@ fetch(`${API}/settings`)
   })
   .catch(err => console.error("settings-fel:", err));
 
-/* ---------- 3. Prenumerationsformulär ---------- */
+/* --------------- 3. PRENUMERATIONSFORMULÄR --------------- */
 document.getElementById("sub-form").addEventListener("submit", async e => {
   e.preventDefault();
   const fd   = new FormData(e.target);
@@ -82,7 +76,7 @@ document.getElementById("sub-form").addEventListener("submit", async e => {
     if (r.ok) {
       toggleAlert("success", "Tack! Du är nu prenumerant.");
       e.target.reset();
-      document.querySelectorAll('#cat-boxes input').forEach(cb => cb.checked=false);
+      document.querySelectorAll('#cat-boxes input').forEach(cb => cb.checked = false);
     } else {
       toggleAlert("error", res.error || "Något gick fel.");
     }
@@ -92,7 +86,7 @@ document.getElementById("sub-form").addEventListener("submit", async e => {
   }
 });
 
-/* ---------- Hjälpfunktioner ---------- */
+/* --------------- 4. HJÄLPFUNKTIONER --------------- */
 function toggleAlert(type, msg) {
   const styles = {
     info:    "bg-blue-100 text-blue-700",
