@@ -4,47 +4,90 @@
   <meta charset="utf-8" />
   <title>Arkiv – AI-Nyheter</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: "class" };
-  </script>
+  <script>tailwind.config={darkMode:"class"};</script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-  <main class="max-w-3xl mx-auto px-4 py-6">
-    <h1 class="text-2xl font-bold mb-4">Arkiv</h1>
 
-    <div id="list" class="space-y-6"></div>
+<main class="max-w-3xl mx-auto px-4 py-6">
+  <h1 class="text-2xl font-bold mb-4">Arkiv</h1>
 
-    <button id="load" class="mt-6 px-4 py-2 rounded bg-indigo-600 text-white">
-      Läs in fler
+  <!-- Filter-rad -->
+  <div class="flex flex-wrap gap-3 mb-6">
+    <select id="catSelect"
+            class="border rounded px-3 py-1 dark:bg-gray-800 dark:border-gray-600">
+      <option value="">Alla kategorier</option>
+    </select>
+
+    <input id="search" type="search" placeholder="Sök …"
+           class="flex-1 border rounded px-3 py-1 dark:bg-gray-800 dark:border-gray-600" />
+
+    <button id="apply"
+            class="px-4 py-1 rounded bg-indigo-600 text-white">
+      Filtrera
     </button>
-  </main>
+  </div>
+
+  <!-- Artiklar -->
+  <div id="list" class="space-y-6"></div>
+
+  <button id="load"
+          class="mt-8 px-4 py-2 rounded bg-indigo-600 text-white">
+    Läs in fler
+  </button>
+</main>
 
 <script>
-const API   = "https://ai-nyheter-backend.onrender.com/api/archive";
-let page    = 1, per = 40;
+const API_BASE = "https://ai-nyheter-backend.onrender.com/api";
+let page = 1, per = 40, currentCat = "", query = "";
 
-async function load() {
-  const r   = await fetch(`${API}?page=${page}&per=${per}`);
-  const arr = await r.json();
-  if (!arr.length) { document.getElementById("load").disabled = true; return; }
-
-  const wrap = document.getElementById("list");
-  arr.forEach(a => {
-    wrap.insertAdjacentHTML("beforeend", `
-      <article class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-        <span class="text-xs py-1 px-2 rounded bg-indigo-600 text-white">${a.category}</span>
-        <h2 class="mt-2 font-semibold">
-          <a href="${a.url}" target="_blank" class="hover:underline">${a.title}</a>
-        </h2>
-        <time class="text-xs text-gray-500">${a.date}</time>
-        <p class="mt-2 text-sm">${a.summary}</p>
-      </article>
-    `);
+// fyll kategori-dropdown
+fetch(`${API_BASE}/settings`)
+  .then(r => r.json())
+  .then(rows => {
+    const sel = document.getElementById("catSelect");
+    const cats = [...new Set(rows.map(r => r.Kategori))];
+    sel.innerHTML += cats.map(c => `<option>${c}</option>`).join("");
   });
-  page++;
-}
+
+document.getElementById("apply").addEventListener("click", () => {
+  currentCat = document.getElementById("catSelect").value;
+  query      = document.getElementById("search").value.trim();
+  page = 1;
+  document.getElementById("list").innerHTML = "";
+  document.getElementById("load").disabled  = false;
+  load();
+});
+
 document.getElementById("load").addEventListener("click", load);
-load();            // första laddningen
+load(); // första laddningen
+
+function load() {
+  const url = new URL(`${API_BASE}/archive`);
+  url.searchParams.set("page", page);
+  url.searchParams.set("per",  per);
+  if (currentCat) url.searchParams.set("cat", currentCat);
+  if (query)      url.searchParams.set("q",   query);
+
+  fetch(url).then(r => r.json()).then(arr => {
+    if (!arr.length) { document.getElementById("load").disabled = true; return; }
+
+    const wrap = document.getElementById("list");
+    arr.forEach(a => {
+      wrap.insertAdjacentHTML("beforeend", `
+        <article class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+          <span class="text-xs py-1 px-2 rounded bg-indigo-600 text-white">${a.category}</span>
+          <h2 class="mt-2 font-semibold">
+            <a href="${a.url}" target="_blank" class="hover:underline">${a.title}</a>
+          </h2>
+          <time class="text-xs text-gray-500">${a.date}</time>
+          <p class="mt-2 text-sm">${a.summary}</p>
+        </article>
+      `);
+    });
+
+    page++;
+  });
+}
 </script>
 </body>
 </html>
