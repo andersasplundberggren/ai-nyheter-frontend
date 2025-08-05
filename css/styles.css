@@ -1,1 +1,7 @@
-
+body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 800px; padding: 1rem; }
+header { text-align: center; }
+#news article { border-bottom: 1px solid #ddd; padding: .5rem 0; }
+#news h3 { margin: 0; }
+fieldset { border: 1px solid #ccc; padding: .5rem; }
+button { padding: .4rem .8rem; }
+#sub-msg { margin-top: .5rem; font-weight: bold; }
