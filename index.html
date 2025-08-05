@@ -3,33 +3,65 @@
 <head>
   <meta charset="utf-8" />
   <title>AI-Nyheter</title>
+
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Egen CSS (valfria overrides) -->
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body>
-  <header>
-    <h1>AI-Nyheter</h1>
+<body class="bg-gray-50 text-gray-900 leading-relaxed">
+
+  <!-- ================= Header ================= -->
+  <header class="py-6 text-center">
+    <h1 class="text-3xl font-bold">AI-Nyheter</h1>
+    <p class="text-gray-600">Snabbt sammanfattade nyheter om artificiell intelligens</p>
   </header>
 
-  <section id="news">
-    <h2>Senaste nyheterna</h2>
-    <div id="news-list"></div>
-  </section>
+  <!-- ================= Loader (döljs efter fetch) ================= -->
+  <div id="loader" class="flex justify-center my-8">
+    <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10"
+              stroke="currentColor" stroke-width="4" fill="none"/>
+      <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+    </svg>
+  </div>
 
-  <section id="subscribe">
-    <h2>Prenumerera</h2>
-    <form id="sub-form">
-      <label>Namn <input type="text" name="name" required /></label>
-      <label>E-post <input type="email" name="email" required /></label>
+  <main class="max-w-3xl mx-auto px-4">
 
-      <fieldset id="cat-boxes">
-        <legend>Välj kategorier</legend>
-        <!-- checkboxar fylls med JS -->
-      </fieldset>
+    <!-- ================= Nyheter ================= -->
+    <section id="news" class="mb-12 hidden">
+      <h2 class="text-xl font-semibold mb-4">Senaste nyheterna</h2>
+      <div id="news-list" class="grid gap-4 sm:grid-cols-2"></div>
+    </section>
 
-      <button type="submit">Prenumerera</button>
-      <p id="sub-msg"></p>
-    </form>
-  </section>
+    <!-- ================= Prenumeration ================= -->
+    <section id="subscribe" class="bg-white p-6 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mb-4">Prenumerera</h2>
+
+      <!-- Alert/feedback -->
+      <div id="alert" class="hidden mb-4 p-3 rounded"></div>
+
+      <form id="sub-form" class="space-y-4">
+        <input type="text" name="name" placeholder="Namn"
+               class="w-full border rounded p-2" required />
+
+        <input type="email" name="email" placeholder="E-post"
+               class="w-full border rounded p-2" required />
+
+        <fieldset id="cat-boxes" class="border rounded p-3">
+          <legend class="font-medium text-sm">Välj kategorier</legend>
+          <!-- checkboxar fylls av main.js -->
+        </fieldset>
+
+        <button type="submit"
+                class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+          Prenumerera
+        </button>
+      </form>
+    </section>
+  </main>
 
   <script src="js/main.js" defer></script>
 </body>
