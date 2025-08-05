@@ -1,58 +1,100 @@
-const API_BASE = "https://ai-nyheter-backend.onrender.com/api";
+const API = "https://ai-nyheter-backend.onrender.com/api";
 
-// ========== 1. Hämta & rendera nyheter ==========
-fetch(`${API_BASE}/news`)
+const loader   = document.getElementById("loader");
+const newsSec  = document.getElementById("news");
+const alertBox = document.getElementById("alert");
+
+/* ---------- 1. Hämta & visa nyheter ---------- */
+fetch(`${API}/news`)
   .then(r => r.json())
   .then(renderNews)
-  .catch(console.error);
+  .catch(err => showError("Kunde inte ladda nyheter", err));
 
 function renderNews(items) {
   const list = document.getElementById("news-list");
+  if (!items.length) return showError("Inga nyheter just nu.");
+
   list.innerHTML = items.map(n => `
-    <article>
-      <h3><a href="${n.url}" target="_blank">${n.title}</a></h3>
-      <small>${n.date}</small>
-      <p>${n.summary}</p>
+    <article class="bg-white p-4 rounded-lg shadow">
+      <h3 class="font-semibold mb-1">
+        <a href="${n.url}" target="_blank"
+           class="text-indigo-600 hover:underline">${n.title}</a>
+      </h3>
+      <time class="text-xs text-gray-500">${n.date}</time>
+      <p class="mt-2 text-sm">${n.summary}</p>
     </article>`).join("");
+
+  loader.classList.add("hidden");
+  newsSec.classList.remove("hidden");
 }
 
-// ========== 2. Ladda kategorier ==========
-fetch(`${API_BASE}/settings`)
+/* ---------- 2. Ladda kategorier ---------- */
+fetch(`${API}/settings`)
   .then(r => r.json())
   .then(cats => {
-    const boxWrap = document.getElementById("cat-boxes");
-    boxWrap.innerHTML = cats.map(c =>
-      `<label><input type="checkbox" value="${c.Kategori}" /> ${c.Kategori}</label>`
-    ).join("<br>");
+    const wrap = document.getElementById("cat-boxes");
+    if (!cats.length) {
+      wrap.innerHTML = "<em>Inga kategorier i systemet</em>";
+      return;
+    }
+    wrap.innerHTML = cats.map(c =>
+      `<label class="inline-flex items-center mr-4 mt-2">
+         <input type="checkbox" value="${c.Kategori}"
+                class="accent-indigo-600" />
+         <span class="ml-1">${c.Kategori}</span>
+       </label>`
+    ).join("");
   })
-  .catch(console.error);
+  .catch(err => console.error("settings-fel:", err));
 
-// ========== 3. Hantera formulär ==========
+/* ---------- 3. Prenumerationsformulär ---------- */
 document.getElementById("sub-form").addEventListener("submit", async e => {
   e.preventDefault();
-  const fd = new FormData(e.target);
-  const selected = [...document.querySelectorAll('#cat-boxes input:checked')]
-                   .map(cb => cb.value);
+  const fd   = new FormData(e.target);
+  const cats = [...document.querySelectorAll('#cat-boxes input:checked')]
+               .map(c => c.value);
 
-  const payload = {
-    name:  fd.get("name"),
-    email: fd.get("email"),
-    categories: selected
-  };
-
-  const msgEl = document.getElementById("sub-msg");
-  msgEl.textContent = "Skickar…";
+  toggleAlert("info", "Skickar …");
 
   try {
-    const r = await fetch(`${API_BASE}/subscribe`, {
+    const r = await fetch(`${API}/subscribe`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        name:  fd.get("name"),
+        email: fd.get("email"),
+        categories: cats
+      })
     });
     const res = await r.json();
-    msgEl.textContent = r.ok ? "Tack! Du är nu prenumerant." : res.error;
+    if (r.ok) {
+      toggleAlert("success", "Tack! Du är nu prenumerant.");
+      e.target.reset();
+      document.querySelectorAll('#cat-boxes input').forEach(cb => cb.checked=false);
+    } else {
+      toggleAlert("error", res.error || "Något gick fel.");
+    }
   } catch (err) {
-    msgEl.textContent = "Något gick fel. Försök igen.";
+    toggleAlert("error", "Nätverksfel. Försök igen.");
     console.error(err);
   }
 });
+
+/* ---------- Hjälpfunktioner ---------- */
+function toggleAlert(type, msg) {
+  const styles = {
+    info:    "bg-blue-100 text-blue-700",
+    success: "bg-green-100 text-green-700",
+    error:   "bg-red-100 text-red-700"
+  };
+  alertBox.className = `${styles[type]} mb-4 p-3 rounded`;
+  alertBox.textContent = msg;
+  alertBox.classList.remove("hidden");
+}
+
+function showError(msg, err) {
+  console.error(err || msg);
+  loader.classList.add("hidden");
+  newsSec.innerHTML = `<p class="text-red-600">${msg}</p>`;
+  newsSec.classList.remove("hidden");
+}
