@@ -15,26 +15,24 @@ function renderNews(items) {
   if (!items.length) return showError("Inga nyheter just nu.");
 
   list.innerHTML = items.map(n => `
--  <article class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
--    <h3 class="font-semibold mb-1">
--      <a href="${n.url}" target="_blank"
--         class="text-indigo-600 hover:underline">${n.title}</a>
--    </h3>
--    <time class="text-xs text-gray-500">${n.date}</time>
--    <p class="mt-2 text-sm">${n.summary}</p>
--  </article>`
-+  <article class="bg-white dark:bg-gray-800
-+                 text-gray-900 dark:text-gray-100
-+                 p-6 rounded-lg shadow">
-+    <h3 class="font-semibold mb-1">
-+      <a href="${n.url}" target="_blank"
-+         class="text-indigo-600 dark:text-indigo-400 hover:underline">
-+         ${n.title}
-+      </a>
-+    </h3>
-+    <time class="text-xs text-gray-500 dark:text-gray-400">${n.date}</time>
-+    <p class="mt-2 text-sm">${n.summary}</p>
-+  </article>`
+    <article class="bg-white dark:bg-gray-800
+                   text-gray-900 dark:text-gray-100
+                   p-6 rounded-lg shadow">
+      <h3 class="font-semibold mb-1">
+        <a href="${n.url}" target="_blank"
+           class="text-indigo-600 dark:text-indigo-400 hover:underline">
+          ${n.title}
+        </a>
+      </h3>
+      <time class="text-xs text-gray-500 dark:text-gray-400">${n.date}</time>
+      <p class="mt-2 text-sm">${n.summary}</p>
+    </article>
+  `).join("");
+
+  loader.classList.add("hidden");
+  newsSec.classList.remove("hidden");
+}
+
  ).join("");
 
 
