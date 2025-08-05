@@ -1,1 +1,36 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <title>AI-Nyheter</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>AI-Nyheter</h1>
+  </header>
 
+  <section id="news">
+    <h2>Senaste nyheterna</h2>
+    <div id="news-list"></div>
+  </section>
+
+  <section id="subscribe">
+    <h2>Prenumerera</h2>
+    <form id="sub-form">
+      <label>Namn <input type="text" name="name" required /></label>
+      <label>E-post <input type="email" name="email" required /></label>
+
+      <fieldset id="cat-boxes">
+        <legend>Välj kategorier</legend>
+        <!-- checkboxar fylls med JS -->
+      </fieldset>
+
+      <button type="submit">Prenumerera</button>
+      <p id="sub-msg"></p>
+    </form>
+  </section>
+
+  <script src="js/main.js" defer></script>
+</body>
+</html>
