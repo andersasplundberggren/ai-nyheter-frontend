@@ -4,21 +4,37 @@
   <meta charset="utf-8" />
   <title>AI-Nyheter</title>
 
-  <!-- Tailwind via CDN -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    /* aktivera klass-läget för dark-mode */
+    tailwind.config = { darkMode: "class" };
+  </script>
 
-  <!-- Egen CSS (valfria overrides) -->
+  <!-- egna små overrides om du vill -->
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body class="bg-gray-50 text-gray-900 leading-relaxed">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 leading-relaxed">
 
-  <!-- ================= Header ================= -->
-  <header class="py-6 text-center">
+  <!-- ===== HEADER ===== -->
+  <header class="py-6 text-center flex flex-col items-center gap-2">
     <h1 class="text-3xl font-bold">AI-Nyheter</h1>
-    <p class="text-gray-600">Snabbt sammanfattade nyheter om artificiell intelligens</p>
+    <p class="text-gray-600 dark:text-gray-400">
+      Snabbt sammanfattade nyheter om artificiell intelligens
+    </p>
+
+    <!-- Dark-mode-knapp -->
+    <button id="toggle-dark"
+            class="mt-2 text-sm px-4 py-1 rounded border
+                   border-gray-400 dark:border-gray-500
+                   hover:bg-gray-100 dark:hover:bg-gray-700
+                   flex items-center gap-1">
+      <span id="toggle-icon">🌙</span>
+      Växla tema
+    </button>
   </header>
 
-  <!-- ================= Loader (döljs efter fetch) ================= -->
+  <!-- ===== LOADER ===== -->
   <div id="loader" class="flex justify-center my-8">
     <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10"
@@ -30,27 +46,27 @@
 
   <main class="max-w-3xl mx-auto px-4">
 
-    <!-- ================= Nyheter ================= -->
+    <!-- ===== NYHETER ===== -->
     <section id="news" class="mb-12 hidden">
       <h2 class="text-xl font-semibold mb-4">Senaste nyheterna</h2>
       <div id="news-list" class="grid gap-4 sm:grid-cols-2"></div>
     </section>
 
-    <!-- ================= Prenumeration ================= -->
-    <section id="subscribe" class="bg-white p-6 rounded-lg shadow">
+    <!-- ===== PRENUMERATION ===== -->
+    <section id="subscribe" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
       <h2 class="text-xl font-semibold mb-4">Prenumerera</h2>
 
-      <!-- Alert/feedback -->
+      <!-- feedback-ruta -->
       <div id="alert" class="hidden mb-4 p-3 rounded"></div>
 
       <form id="sub-form" class="space-y-4">
         <input type="text" name="name" placeholder="Namn"
-               class="w-full border rounded p-2" required />
+               class="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600" required />
 
         <input type="email" name="email" placeholder="E-post"
-               class="w-full border rounded p-2" required />
+               class="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600" required />
 
-        <fieldset id="cat-boxes" class="border rounded p-3">
+        <fieldset id="cat-boxes" class="border rounded p-3 dark:border-gray-600">
           <legend class="font-medium text-sm">Välj kategorier</legend>
           <!-- checkboxar fylls av main.js -->
         </fieldset>
@@ -63,6 +79,28 @@
     </section>
   </main>
 
+  <!-- ===== HUVUD-SCRIPT ===== -->
   <script src="js/main.js" defer></script>
+
+  <!-- ===== DARK-MODE-SCRIPT ===== -->
+  <script>
+    const html      = document.documentElement;
+    const btn       = document.getElementById("toggle-dark");
+    const iconSpan  = document.getElementById("toggle-icon");
+
+    // använd sparat tema eller system-preferens som start
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (localStorage.theme === "dark" || (!localStorage.theme && prefersDark)) {
+      html.classList.add("dark");
+      iconSpan.textContent = "☀️";
+    }
+
+    btn.addEventListener("click", () => {
+      html.classList.toggle("dark");
+      const isDark = html.classList.contains("dark");
+      localStorage.theme = isDark ? "dark" : "light";
+      iconSpan.textContent = isDark ? "☀️" : "🌙";
+    });
+  </script>
 </body>
 </html>
