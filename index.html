@@ -7,11 +7,10 @@
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    /* aktivera klass-läget för dark-mode */
-    tailwind.config = { darkMode: "class" };
+    tailwind.config = { darkMode: "class" };   /* dark-mode via klass */
   </script>
 
-  <!-- egna små overrides om du vill -->
+  <!-- egna overrides -->
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 leading-relaxed">
@@ -79,27 +78,31 @@
     </section>
   </main>
 
+  <!-- ===== FOOTER med Arkiv-länk ===== -->
+  <footer class="mt-10 text-center text-sm">
+    <a href="arkiv.html" class="text-indigo-600 hover:underline">Arkiv →</a>
+  </footer>
+
   <!-- ===== HUVUD-SCRIPT ===== -->
   <script src="js/main.js" defer></script>
 
   <!-- ===== DARK-MODE-SCRIPT ===== -->
   <script>
-    const html      = document.documentElement;
-    const btn       = document.getElementById("toggle-dark");
-    const iconSpan  = document.getElementById("toggle-icon");
+    const html  = document.documentElement;
+    const btn   = document.getElementById("toggle-dark");
+    const icon  = document.getElementById("toggle-icon");
 
-    // använd sparat tema eller system-preferens som start
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     if (localStorage.theme === "dark" || (!localStorage.theme && prefersDark)) {
       html.classList.add("dark");
-      iconSpan.textContent = "☀️";
+      icon.textContent = "☀️";
     }
 
     btn.addEventListener("click", () => {
       html.classList.toggle("dark");
       const isDark = html.classList.contains("dark");
       localStorage.theme = isDark ? "dark" : "light";
-      iconSpan.textContent = isDark ? "☀️" : "🌙";
+      icon.textContent   = isDark ? "☀️" : "🌙";
     });
   </script>
 </body>
