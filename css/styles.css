@@ -5,3 +5,8 @@ header { text-align: center; }
 fieldset { border: 1px solid #ccc; padding: .5rem; }
 button { padding: .4rem .8rem; }
 #sub-msg { margin-top: .5rem; font-weight: bold; }
+/* extra padding i nyhetskort */
+#news-list article { padding: 1.25rem; }      /* 20 px */
+@media (min-width: 640px) {                   /* sm: */
+  #news-list article { padding: 1.5rem; }     /* 24 px */
+}
