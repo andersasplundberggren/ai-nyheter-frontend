@@ -15,7 +15,7 @@ function renderNews(items) {
   if (!items.length) return showError("Inga nyheter just nu.");
 
   list.innerHTML = items.map(n => `
-    <article class="bg-white px-10 rounded-lg shadow">
+    <article class="bg-white p-6 rounded-lg shadow">
       <h3 class="font-semibold mb-1">
         <a href="${n.url}" target="_blank"
            class="text-indigo-600 hover:underline">${n.title}</a>
