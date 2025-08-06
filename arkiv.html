@@ -3,15 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <title>Arkiv – AI-Nyheter</title>
+
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={darkMode:"class"};</script>
+  <script>tailwind.config = { darkMode: "class" };</script>
 </head>
+
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
 <main class="max-w-3xl mx-auto px-4 py-6">
-  <h1 class="text-2xl font-bold mb-4">Arkiv</h1>
 
-  <!-- Filter-rad -->
+  <!-- Navigering ---------------------------------------------------- -->
+  <header class="mb-6 flex items-center gap-4">
+    <h1 class="text-2xl font-bold">Arkiv</h1>
+    <a href="https://andersasplundberggren.github.io/ai-nyheter-frontend/"
+       class="text-indigo-600 hover:underline text-sm">
+      ← Till startsidan
+    </a>
+  </header>
+
+  <!-- Filter-rad ---------------------------------------------------- -->
   <div class="flex flex-wrap gap-3 mb-6">
     <select id="catSelect"
             class="border rounded px-3 py-1 dark:bg-gray-800 dark:border-gray-600">
@@ -27,66 +38,124 @@
     </button>
   </div>
 
-  <!-- Artiklar -->
+  <!-- Loader -------------------------------------------------------- -->
+  <div id="loader" class="my-10 flex justify-center">
+    <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10"
+              stroke="currentColor" stroke-width="4" fill="none"/>
+      <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+    </svg>
+  </div>
+
+  <!-- Artiklar ------------------------------------------------------ -->
   <div id="list" class="space-y-6"></div>
 
   <button id="load"
-          class="mt-8 px-4 py-2 rounded bg-indigo-600 text-white">
+          class="mt-8 px-4 py-2 rounded bg-indigo-600 text-white hidden">
     Läs in fler
   </button>
 </main>
 
-<script>
-const API_BASE = "https://ai-nyheter-backend.onrender.com/api";
-let page = 1, per = 40, currentCat = "", query = "";
 
-// fyll kategori-dropdown
-fetch(`${API_BASE}/settings`)
+<!-- Huvud-script ---------------------------------------------------- -->
+<script>
+const API = "https://ai-nyheter-backend.onrender.com/api/archive-sheet";
+const PER_PAGE = 40;
+
+let ALL = [];          // hela Sheet-arkivet
+let view = [];         // filtrerat resultat
+let shown = 0;         // hur många som redan visas
+
+/* ---------- 1. Hämta hela arkivet ---------- */
+fetch(API)
   .then(r => r.json())
-  .then(rows => {
-    const sel = document.getElementById("catSelect");
-    const cats = [...new Set(rows.map(r => r.Kategori))];
-    sel.innerHTML += cats.map(c => `<option>${c}</option>`).join("");
+  .then(data => {
+    ALL = data;
+    initFilters();
+    applyFilters();    // första render-omgången
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("loader").remove();
+    document.getElementById("list").innerHTML =
+      "<p class='text-red-600'>Kunde inte ladda arkivet.</p>";
   });
 
+/* ---------- 2. Fyll kategori-dropdown ---------- */
+function initFilters() {
+  const sel = document.getElementById("catSelect");
+  const cats = [...new Set(ALL.map(a => a.category))].sort();
+  sel.innerHTML += cats.map(c => `<option>${c}</option>`).join("");
+}
+
+/* ---------- 3. Filtreringsknapp ---------- */
 document.getElementById("apply").addEventListener("click", () => {
-  currentCat = document.getElementById("catSelect").value;
-  query      = document.getElementById("search").value.trim();
-  page = 1;
-  document.getElementById("list").innerHTML = "";
-  document.getElementById("load").disabled  = false;
-  load();
+  shown = 0;
+  applyFilters();
 });
 
-document.getElementById("load").addEventListener("click", load);
-load(); // första laddningen
+/* ---------- 4. Läs-in-fler-knapp ---------- */
+document.getElementById("load").addEventListener("click", () => {
+  renderMore();
+});
 
-function load() {
-  const url = new URL(`${API_BASE}/archive`);
-  url.searchParams.set("page", page);
-  url.searchParams.set("per",  per);
-  if (currentCat) url.searchParams.set("cat", currentCat);
-  if (query)      url.searchParams.set("q",   query);
+/* ---------- 5. Filtrera + rendera ---------- */
+function applyFilters() {
+  const cat = document.getElementById("catSelect").value.toLowerCase();
+  const q   = document.getElementById("search").value.trim().toLowerCase();
 
-  fetch(url).then(r => r.json()).then(arr => {
-    if (!arr.length) { document.getElementById("load").disabled = true; return; }
-
-    const wrap = document.getElementById("list");
-    arr.forEach(a => {
-      wrap.insertAdjacentHTML("beforeend", `
-        <article class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-          <span class="text-xs py-1 px-2 rounded bg-indigo-600 text-white">${a.category}</span>
-          <h2 class="mt-2 font-semibold">
-            <a href="${a.url}" target="_blank" class="hover:underline">${a.title}</a>
-          </h2>
-          <time class="text-xs text-gray-500">${a.date}</time>
-          <p class="mt-2 text-sm">${a.summary}</p>
-        </article>
-      `);
-    });
-
-    page++;
+  view = ALL.filter(a => {
+    const okCat = !cat || a.category.toLowerCase() === cat;
+    const txt   = (a.title + a.summary).toLowerCase();
+    const okQ   = !q || txt.includes(q);
+    return okCat && okQ;
   });
+
+  document.getElementById("list").innerHTML = "";
+  renderMore(true);
+}
+
+/* ---------- 6. Rendera nästa block ---------- */
+function renderMore(reset = false) {
+  const list   = document.getElementById("list");
+  const loader = document.getElementById("loader");
+  const button = document.getElementById("load");
+
+  if (reset) shown = 0;
+  const slice = view.slice(shown, shown + PER_PAGE);
+
+  slice.forEach(a => {
+    list.insertAdjacentHTML("beforeend", `
+      <article class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded">
+            ${a.category}
+          </span>
+          ${a.paywall === "1" ? "🔒" : ""}
+        </div>
+        <h2 class="font-semibold">
+          <a href="${a.url}" target="_blank" class="hover:underline">${a.title}</a>
+        </h2>
+        <time class="text-xs text-gray-500">${a.date}</time>
+        <p class="mt-2 text-sm">${a.summary}</p>
+      </article>
+    `);
+  });
+
+  shown += slice.length;
+  loader.classList.add("hidden");
+
+  if (shown >= view.length) {
+    button.classList.add("hidden");
+  } else {
+    button.classList.remove("hidden");
+  }
+
+  if (!view.length) {
+    list.innerHTML = "<p>Inga träffar.</p>";
+    button.classList.add("hidden");
+  }
 }
 </script>
 </body>
