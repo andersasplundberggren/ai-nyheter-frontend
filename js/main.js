@@ -12,19 +12,28 @@ fetch(`${API}/news`)
   .catch(err => showError("Kunde inte ladda nyheter", err));
 
 function renderNews(items) {
-  const list = document.getElementById("news-list");
-  if (!items.length) return showError("Inga nyheter just nu.");
+  // 1) visa bara de sex första
+  const top6 = items.slice(0, 6);
 
-  list.innerHTML = items.map(n => `
+  const list = document.getElementById("news-list");
+  list.innerHTML = top6.map(n => `
     <article class="bg-white dark:bg-gray-800
                    text-gray-900 dark:text-gray-100
                    p-6 rounded-lg shadow">
-      <h3 class="font-semibold mb-1">
-        <a href="${n.url}" target="_blank"
-           class="text-indigo-600 dark:text-indigo-400 hover:underline">
-          ${n.title}
-        </a>
-      </h3>
+      <div class="flex items-center justify-between mb-1">
+        <h3 class="font-semibold">
+          ${n.paywall ? "🔒 " : ""}
+          <a href="${n.url}" target="_blank"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">
+            ${n.title}
+          </a>
+        </h3>
+        <span class="text-xs bg-indigo-100 dark:bg-indigo-700
+                     text-indigo-700 dark:text-indigo-100
+                     px-2 py-0.5 rounded">
+          ${n.category}
+        </span>
+      </div>
       <time class="text-xs text-gray-500 dark:text-gray-400">${n.date}</time>
       <p class="mt-2 text-sm">${n.summary}</p>
     </article>
@@ -33,6 +42,7 @@ function renderNews(items) {
   loader.classList.add("hidden");
   newsSec.classList.remove("hidden");
 }
+
 
 /* --------------- 2. LADDA KATEGORIER --------------- */
 fetch(`${API}/settings`)
