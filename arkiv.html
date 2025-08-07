@@ -11,86 +11,96 @@
 
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-<main class="max-w-3xl mx-auto px-4 py-6">
+<!-- =========  HUVUDBEHÅLLARE: två kolumner  ========= -->
+<div class="min-h-screen grid md:grid-cols-[260px_1fr]">
 
-  <!-- ========== SIDHUVUD ========== -->
-  <header class="mb-6 flex flex-wrap items-center gap-4">
-    <h1 class="text-2xl font-bold">Arkiv</h1>
+  <!-- =========  SIDOPANEL  ========= -->
+  <aside class="border-r dark:border-gray-700 p-4 space-y-6 sticky top-0 h-screen overflow-y-auto
+                 bg-white/70 dark:bg-gray-800/70 backdrop-blur md:backdrop-blur-sm">
 
-    <a href="https://andersasplundberggren.github.io/ai-nyheter-frontend/"
-       class="text-indigo-600 hover:underline text-sm">
-      ← Till startsidan
-    </a>
+    <!-- Logo / länk -->
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl font-bold">Arkiv</h1>
+      <a href="https://andersasplundberggren.github.io/ai-nyheter-frontend/"
+         class="text-indigo-600 hover:underline text-sm">
+        ← Startsidan
+      </a>
+    </div>
 
-    <!-- Dark-mode-knapp -->
+    <!-- Temaväljare -->
     <button id="toggle-dark"
-            class="ml-auto text-sm px-4 py-1 rounded border
+            class="w-full text-sm px-4 py-2 rounded border
                    border-gray-400 dark:border-gray-500
                    hover:bg-gray-100 dark:hover:bg-gray-700
-                   flex items-center gap-1">
+                   flex items-center justify-center gap-2">
       <span id="toggle-icon">🌙</span>
       Växla tema
     </button>
-  </header>
 
-  <!-- ========== FILTERRAD ========== -->
-  <div class="flex flex-wrap gap-3 mb-6">
-    <select id="catSelect"
-            class="border rounded px-3 py-1 dark:bg-gray-800 dark:border-gray-600">
-      <option value="">Alla kategorier</option>
-    </select>
+    <!-- Filter / sök -->
+    <div class="space-y-3">
+      <label class="block text-sm font-medium">Kategori</label>
+      <select id="catSelect"
+              class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600">
+        <option value="">Alla kategorier</option>
+      </select>
 
-    <input id="search" type="search" placeholder="Sök …"
-           class="flex-1 border rounded px-3 py-1 dark:bg-gray-800 dark:border-gray-600" />
+      <label class="block text-sm font-medium mt-4">Sökord</label>
+      <input id="search" type="search" placeholder="Sök …"
+             class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600" />
 
-    <button id="apply"
-            class="px-4 py-1 rounded bg-indigo-600 text-white">
-      Filtrera
+      <button id="apply"
+              class="w-full mt-4 px-4 py-2 rounded bg-indigo-600 text-white">
+        Filtrera
+      </button>
+    </div>
+  </aside>
+
+  <!-- =========  HÖGERKOLUMN – ARTIKLAR  ========= -->
+  <main class="p-6">
+
+    <!-- Loader -->
+    <div id="loader" class="my-10 flex justify-center">
+      <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10"
+                stroke="currentColor" stroke-width="4" fill="none"/>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+      </svg>
+    </div>
+
+    <!-- Artiklar -->
+    <div id="list" class="space-y-6"></div>
+
+    <!-- Läs in fler -->
+    <button id="load"
+            class="mt-8 px-4 py-2 rounded bg-indigo-600 text-white hidden">
+      Läs in fler
     </button>
-  </div>
+  </main>
+</div>
 
-  <!-- ========== LOADER ========== -->
-  <div id="loader" class="my-10 flex justify-center">
-    <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10"
-              stroke="currentColor" stroke-width="4" fill="none"/>
-      <path class="opacity-75" fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
-    </svg>
-  </div>
-
-  <!-- ========== ARTIKLAR ========== -->
-  <div id="list" class="space-y-6"></div>
-
-  <button id="load"
-          class="mt-8 px-4 py-2 rounded bg-indigo-600 text-white hidden">
-    Läs in fler
-  </button>
-</main>
-
-
-<!-- ========== HUVUD-SCRIPT ========== -->
+<!-- =========  HUVUD-SCRIPT  ========= -->
 <script src="js/arkiv.js" defer></script>
 
-<!-- ========== DARK-MODE-SCRIPT ========== -->
+<!-- =========  DARK-MODE-SCRIPT  ========= -->
 <script defer>
-  const html      = document.documentElement;
-  const btn       = document.getElementById("toggle-dark");
-  const iconSpan  = document.getElementById("toggle-icon");
+const html     = document.documentElement;
+const btn      = document.getElementById("toggle-dark");
+const iconSpan = document.getElementById("toggle-icon");
 
-  // startläge: sparad preferens eller systempreferens
-  const prefers = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  if (localStorage.theme === "dark" || (!localStorage.theme && prefers)) {
-    html.classList.add("dark");
-    iconSpan.textContent = "☀️";
-  }
+const prefers  = window.matchMedia("(prefers-color-scheme: dark)").matches;
+if (localStorage.theme === "dark" || (!localStorage.theme && prefers)) {
+  html.classList.add("dark");
+  iconSpan.textContent = "☀️";
+}
 
-  btn.addEventListener("click", () => {
-    html.classList.toggle("dark");
-    const isDark = html.classList.contains("dark");
-    localStorage.theme = isDark ? "dark" : "light";
-    iconSpan.textContent = isDark ? "☀️" : "🌙";
-  });
+btn.addEventListener("click", () => {
+  html.classList.toggle("dark");
+  const isDark = html.classList.contains("dark");
+  localStorage.theme = isDark ? "dark" : "light";
+  iconSpan.textContent = isDark ? "☀️" : "🌙";
+});
 </script>
 </body>
 </html>
