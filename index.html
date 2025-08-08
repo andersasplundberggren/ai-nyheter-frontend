@@ -7,55 +7,67 @@
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = { darkMode: "class" };   /* dark-mode via klass */
+    tailwind.config = { darkMode: "class" };
   </script>
 
-  <!-- egna overrides -->
   <link rel="stylesheet" href="css/styles.css" />
 </head>
+
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 leading-relaxed">
 
   <!-- ===== HEADER ===== -->
   <header class="py-6 text-center flex flex-col items-center gap-2">
     <h1 class="text-3xl font-bold">AI-Nyheter</h1>
-    <p class="text-gray-600 dark:text-gray-400">
-      Snabbt sammanfattade nyheter om artificiell intelligens
-    </p>
+    <p class="text-gray-600 dark:text-gray-400">Snabbt sammanfattade nyheter om artificiell intelligens</p>
 
-    <!-- Dark-mode-knapp -->
     <button id="toggle-dark"
-            class="mt-2 text-sm px-4 py-1 rounded border
-                   border-gray-400 dark:border-gray-500
-                   hover:bg-gray-100 dark:hover:bg-gray-700
-                   flex items-center gap-1">
-      <span id="toggle-icon">🌙</span>
-      Växla tema
+            class="mt-2 text-sm px-4 py-1 rounded border border-gray-400 dark:border-gray-500
+                   hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1">
+      <span id="toggle-icon">🌙</span> Växla tema
     </button>
   </header>
 
-  <!-- ===== LOADER ===== -->
-  <div id="loader" class="flex justify-center my-8">
-    <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10"
-              stroke="currentColor" stroke-width="4" fill="none"/>
-      <path class="opacity-75" fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
-    </svg>
-  </div>
+  <!-- ===== MAIN INNEHÅLL ===== -->
+  <main class="max-w-4xl mx-auto px-4">
 
-  <main class="max-w-3xl mx-auto px-4">
+    <!-- === SÖK + FILTER === -->
+    <section class="mb-8">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <select id="catSelect" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600">
+          <option value="">Alla kategorier</option>
+        </select>
 
-    <!-- ===== NYHETER ===== -->
-    <section id="news" class="mb-12 hidden">
-      <h2 class="text-xl font-semibold mb-4">Senaste nyheterna</h2>
-      <div id="news-list" class="grid gap-4 sm:grid-cols-2"></div>
+        <input id="search" type="search" placeholder="Sök i titlar eller sammanfattningar …"
+               class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600" />
+      </div>
+      <button id="apply"
+              class="w-full mt-4 px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">
+        Filtrera
+      </button>
     </section>
 
-    <!-- ===== PRENUMERATION ===== -->
-    <section id="subscribe" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-      <h2 class="text-xl font-semibold mb-4">Prenumerera</h2>
+    <!-- === LOADER === -->
+    <div id="loader" class="flex justify-center my-8">
+      <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10"
+                stroke="currentColor" stroke-width="4" fill="none"/>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+      </svg>
+    </div>
 
-      <!-- feedback-ruta -->
+    <!-- === NYHETER === -->
+    <section id="news" class="hidden">
+      <h2 class="text-xl font-semibold mb-4">Senaste nyheterna</h2>
+      <div id="news-list" class="grid gap-4 sm:grid-cols-2"></div>
+      <button id="load" class="mt-6 px-4 py-2 rounded bg-indigo-600 text-white hidden">
+        Läs in fler
+      </button>
+    </section>
+
+    <!-- === PRENUMERATION === -->
+    <section id="subscribe" class="mt-12 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mb-4">Prenumerera</h2>
       <div id="alert" class="hidden mb-4 p-3 rounded"></div>
 
       <form id="sub-form" class="space-y-4">
@@ -67,7 +79,7 @@
 
         <fieldset id="cat-boxes" class="border rounded p-3 dark:border-gray-600">
           <legend class="font-medium text-sm">Välj kategorier</legend>
-          <!-- checkboxar fylls av main.js -->
+          <!-- Checkboxar fylls via script -->
         </fieldset>
 
         <button type="submit"
@@ -78,15 +90,9 @@
     </section>
   </main>
 
-  <!-- ===== FOOTER med Arkiv-länk ===== -->
-  <footer class="mt-10 text-center text-sm">
-    <a href="arkiv.html" class="text-indigo-600 hover:underline">Arkiv →</a>
-  </footer>
-
-  <!-- ===== HUVUD-SCRIPT ===== -->
+  <!-- ===== SCRIPT ===== -->
   <script src="js/main.js" defer></script>
 
-  <!-- ===== DARK-MODE-SCRIPT ===== -->
   <script>
     const html  = document.documentElement;
     const btn   = document.getElementById("toggle-dark");
