@@ -1,91 +1,107 @@
-const API = "https://ai-nyheter-backend.onrender.com/api";
-let allNews = [];
-let shownCount = 0;
-const step = 10;
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arkiv – AI-Nyheter</title>
 
-const loader = document.getElementById("loader");
-const list = document.getElementById("list");
-const loadBtn = document.getElementById("load");
-const catSelect = document.getElementById("catSelect");
-const searchInput = document.getElementById("search");
-const applyBtn = document.getElementById("apply");
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: "class" };</script>
+</head>
 
-// 1. Hämta alla artiklar + kategorier
-Promise.all([
-  fetch(`${API}/all`).then(r => r.json()),
-  fetch(`${API}/settings`).then(r => r.json())
-]).then(([articles, categories]) => {
-  allNews = articles;
-  loader.classList.add("hidden");
-  loadMore();
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-  // Fyll kategoriväljaren
-  categories.forEach(c => {
-    const opt = document.createElement("option");
-    opt.value = c.Kategori;
-    opt.textContent = c.Kategori;
-    catSelect.appendChild(opt);
-  });
-}).catch(err => {
-  console.error("Fel vid laddning:", err);
-  loader.innerHTML = `<p class="text-red-600">Kunde inte ladda artiklar.</p>`;
-});
+<!-- =========  HUVUDBEHÅLLARE: två kolumner  ========= -->
+<div class="min-h-screen grid md:grid-cols-[260px_1fr]">
 
-// 2. Rendera fler artiklar (10 åt gången)
-function loadMore() {
-  const filtered = getFilteredNews();
-  const next = filtered.slice(shownCount, shownCount + step);
+  <!-- =========  SIDOPANEL  ========= -->
+  <aside class="border-r dark:border-gray-700 p-4 space-y-6 sticky top-0 h-screen overflow-y-auto
+                 bg-white/70 dark:bg-gray-800/70 backdrop-blur md:backdrop-blur-sm">
 
-  next.forEach(n => {
-    const article = document.createElement("article");
-    article.className = "bg-white dark:bg-gray-800 p-6 rounded-lg shadow";
-    article.innerHTML = `
-      <div class="flex items-center justify-between mb-1">
-        <h3 class="font-semibold">
-          ${n.paywall ? "🔒 " : ""}
-          <a href="${n.url}" target="_blank"
-             class="text-indigo-600 dark:text-indigo-400 hover:underline">
-            ${n.title}
-          </a>
-        </h3>
-        <span class="text-xs bg-indigo-100 dark:bg-indigo-700
-                     text-indigo-700 dark:text-indigo-100
-                     px-2 py-0.5 rounded">
-          ${n.category}
-        </span>
-      </div>
-      <time class="text-xs text-gray-500 dark:text-gray-400">${n.date}</time>
-      <p class="mt-2 text-sm">${n.summary}</p>
-    `;
-    list.appendChild(article);
-  });
+    <!-- Logo / länk -->
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl font-bold">Arkiv</h1>
+      <a href="index.html"
+         class="text-indigo-600 hover:underline text-sm">
+        ← Startsidan
+      </a>
+    </div>
 
-  shownCount += next.length;
-  if (shownCount >= getFilteredNews().length) {
-    loadBtn.classList.add("hidden");
-  } else {
-    loadBtn.classList.remove("hidden");
-  }
+    <!-- Temaväljare -->
+    <button id="toggle-dark"
+            class="w-full text-sm px-4 py-2 rounded border
+                   border-gray-400 dark:border-gray-500
+                   hover:bg-gray-100 dark:hover:bg-gray-700
+                   flex items-center justify-center gap-2">
+      <span id="toggle-icon">🌙</span>
+      Växla tema
+    </button>
+
+    <!-- Filter / sök -->
+    <div class="space-y-3">
+      <label class="block text-sm font-medium">Kategori</label>
+      <select id="catSelect"
+              class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600">
+        <option value="">Alla kategorier</option>
+      </select>
+
+      <label class="block text-sm font-medium mt-4">Sökord</label>
+      <input id="search" type="search" placeholder="Sök …"
+             class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600" />
+
+      <button id="apply"
+              class="w-full mt-4 px-4 py-2 rounded bg-indigo-600 text-white">
+        Filtrera
+      </button>
+    </div>
+  </aside>
+
+  <!-- =========  HÖGERKOLUMN – ARTIKLAR  ========= -->
+  <main class="p-6">
+
+    <!-- Loader -->
+    <div id="loader" class="my-10 flex justify-center">
+      <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10"
+                stroke="currentColor" stroke-width="4" fill="none"/>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+      </svg>
+    </div>
+
+    <!-- Artiklar -->
+    <div id="list" class="space-y-6"></div>
+
+    <!-- Läs in fler -->
+    <button id="load"
+            class="mt-8 px-4 py-2 rounded bg-indigo-600 text-white hidden">
+      Läs in fler
+    </button>
+  </main>
+</div>
+
+<!-- =========  HUVUD-SCRIPT (arkiv.js) ========= -->
+<script src="js/arkiv.js" type="module" defer></script>
+
+<!-- =========  DARK-MODE-SCRIPT ========= -->
+<script defer>
+const html     = document.documentElement;
+const btn      = document.getElementById("toggle-dark");
+const iconSpan = document.getElementById("toggle-icon");
+
+const prefers  = window.matchMedia("(prefers-color-scheme: dark)").matches;
+if (localStorage.theme === "dark" || (!localStorage.theme && prefers)) {
+  html.classList.add("dark");
+  iconSpan.textContent = "☀️";
 }
 
-// 3. Filtrera på kategori och sökord
-function getFilteredNews() {
-  const cat = catSelect.value;
-  const keyword = searchInput.value.toLowerCase();
-  return allNews.filter(n => {
-    const matchCat = !cat || n.category === cat;
-    const matchText = !keyword || (
-      n.title.toLowerCase().includes(keyword) ||
-      n.summary.toLowerCase().includes(keyword)
-    );
-    return matchCat && matchText;
-  });
-}
-
-// 4. Händelser
-loadBtn.addEventListener("click", loadMore);
-applyBtn.addEventListener("click", () => {
-  shownCount = 0;
-  list.innerHTML = "";
-  loadMore();
+btn.addEventListener("click", () => {
+  html.classList.toggle("dark");
+  const isDark = html.classList.contains("dark");
+  localStorage.theme = isDark ? "dark" : "light";
+  iconSpan.textContent = isDark ? "☀️" : "🌙";
 });
+</script>
+</body>
+</html>
