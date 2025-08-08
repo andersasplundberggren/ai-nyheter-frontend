@@ -6,7 +6,7 @@ const newsSec  = document.getElementById("news");
 const alertBox = document.getElementById("alert");
 
 /* --------------- 1. HÄMTA & VISA NYHETER --------------- */
-fetch(`${API}/news`)
+fetch(`${API}/latest`)
   .then(r => r.json())
   .then(renderNews)
   .catch(err => showError("Kunde inte ladda nyheter", err));
