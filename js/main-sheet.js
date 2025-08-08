@@ -151,7 +151,7 @@ subForm.addEventListener("submit", (e) => {
     .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
     .join("&");
 
-  fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbyqBfZ09p5apVdan986Gc__MXEjq56ob-D6zdsodqZxEnYHFf2PirQjfx7fYGHLqYju/exec", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: encoded
