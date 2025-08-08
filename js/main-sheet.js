@@ -4,7 +4,7 @@ const CATS_TAB = "Kategorier";
 const NEWS_TAB = "Artiklar";
 const SUBS_TAB = "Prenumeranter";
 const FORM_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqBfZ09p5apVdan986Gc__MXEjq56ob-D6zdsodqZxEnYHFf2PirQjfx7fYGHLqYju/exec";
-const EDIT_BASE_URL = "https://nyheter.aspislabb.se/redigera"; // <-- Ändra till din riktiga URL
+const EDIT_BASE_URL = "https://nyheter.aspislabb.se/redigera";
 
 // =================== ELEMENT ===================
 const loader    = document.getElementById("loader");
@@ -163,7 +163,8 @@ subForm.addEventListener("submit", (e) => {
   .then(r => {
     if (r.ok) {
       const editLink = `${EDIT_BASE_URL}?token=${token}`;
-      showAlert("success", `Tack! Du är nu prenumerant. <a href='${editLink}' class='underline ml-1'>Hantera prenumeration</a>`);
+      showAlert("success", `Tack! Du är nu prenumerant. <br> <a href='${editLink}' class='underline ml-1'>Hantera prenumeration här</a>`);
+      sendConfirmationEmail(name, email, editLink);
     } else {
       showAlert("error", "Något gick fel.");
     }
@@ -180,4 +181,16 @@ function showAlert(type, msg) {
   alertBox.className = `${styles[type]} mb-4 p-3 rounded`;
   alertBox.innerHTML = msg;
   alertBox.classList.remove("hidden");
+}
+
+// =================== 6. SKICKA MEJL ===================
+function sendConfirmationEmail(name, email, editLink) {
+  fetch("https://aspislabb-mailer.onrender.com/send-confirm", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, editLink })
+  })
+  .then(res => res.json())
+  .then(res => console.log("Bekräftelsemail skickat:", res))
+  .catch(err => console.error("Fel vid e-postutskick:", err));
 }
