@@ -2,21 +2,15 @@
 const SHEET_ID = "1vSsBLHX2RzL84v_6nIVn4umBt8t5t2sMsSe_WgR9p3M";
 const CATS_TAB = "Kategorier";
 const NEWS_TAB = "Artiklar";
-const SUBS_TAB = "Prenumeranter";
-const FORM_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqBfZ09p5apVdan986Gc__MXEjq56ob-D6zdsodqZxEnYHFf2PirQjfx7fYGHLqYju/exec";
-const EDIT_BASE_URL = "https://nyheter.aspislabb.se/redigera";
 
 // =================== ELEMENT ===================
 const loader    = document.getElementById("loader");
 const newsSec   = document.getElementById("news");
 const newsList  = document.getElementById("news-list");
-const alertBox  = document.getElementById("alert");
 const loadBtn   = document.getElementById("load");
 const catSelect = document.getElementById("catSelect");
 const search    = document.getElementById("search");
 const applyBtn  = document.getElementById("apply");
-const subForm   = document.getElementById("sub-form");
-const catBoxes  = document.getElementById("cat-boxes");
 
 let allNews = [];
 let allCategories = [];
@@ -41,13 +35,6 @@ Tabletop.init({
       catSelect.appendChild(opt);
     });
 
-    catBoxes.innerHTML = allCategories.map(c =>
-      `<label class="inline-flex items-center mr-4 mt-2">
-         <input type="checkbox" value="${c}" class="accent-indigo-600" />
-         <span class="ml-1">${c}</span>
-       </label>`
-    ).join("");
-
     allNews = articles.map(row => ({
       title: row.title,
       url: row.url,
@@ -62,7 +49,10 @@ Tabletop.init({
     renderMore();
   },
   error: (err) => {
-    showError("Kunde inte ladda data från Google Sheet", err);
+    console.error("Kunde inte ladda data från Sheet:", err);
+    loader.classList.add("hidden");
+    newsSec.innerHTML = `<p class="text-red-600">Kunde inte ladda nyheter.</p>`;
+    newsSec.classList.remove("hidden");
   }
 });
 
@@ -119,78 +109,3 @@ applyBtn.addEventListener("click", () => {
 });
 
 loadBtn.addEventListener("click", renderMore);
-
-// =================== 4. FELMEDDELANDE ===================
-function showError(msg, err) {
-  console.error(err || msg);
-  loader.classList.add("hidden");
-  newsSec.innerHTML = `<p class="text-red-600">${msg}</p>`;
-  newsSec.classList.remove("hidden");
-}
-
-// =================== 5. PRENUMERERA ===================
-subForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const fd = new FormData(subForm);
-  const name = fd.get("name");
-  const email = fd.get("email");
-  const selectedCats = [...catBoxes.querySelectorAll("input:checked")].map(c => c.value);
-
-  if (!name || !email || selectedCats.length === 0) {
-    showAlert("error", "Fyll i alla fält och välj minst en kategori");
-    return;
-  }
-
-  const token = crypto.randomUUID();
-
-  const newRow = {
-    Namn: name,
-    "E-post": email,
-    Kategorier: selectedCats.join(", "),
-    Status: "Aktiv",
-    Token: token
-  };
-
-  const encoded = Object.entries(newRow)
-    .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
-    .join("&");
-
-  fetch(FORM_SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: encoded
-  })
-  .then(r => {
-    if (r.ok) {
-      const editLink = `${EDIT_BASE_URL}?token=${token}`;
-      showAlert("success", `Tack! Du är nu prenumerant. <br> <a href='${editLink}' class='underline ml-1'>Hantera prenumeration här</a>`);
-      sendConfirmationEmail(name, email, editLink);
-    } else {
-      showAlert("error", "Något gick fel.");
-    }
-  })
-  .catch(() => showAlert("error", "Nätverksfel. Försök igen."));
-});
-
-function showAlert(type, msg) {
-  const styles = {
-    info:    "bg-blue-100 text-blue-700",
-    success: "bg-green-100 text-green-700",
-    error:   "bg-red-100 text-red-700"
-  };
-  alertBox.className = `${styles[type]} mb-4 p-3 rounded`;
-  alertBox.innerHTML = msg;
-  alertBox.classList.remove("hidden");
-}
-
-// =================== 6. SKICKA MEJL ===================
-function sendConfirmationEmail(name, email, editLink) {
-  fetch("https://aspislabb-mailer.onrender.com/send-confirm", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, editLink })
-  })
-  .then(res => res.json())
-  .then(res => console.log("Bekräftelsemail skickat:", res))
-  .catch(err => console.error("Fel vid e-postutskick:", err));
-}
