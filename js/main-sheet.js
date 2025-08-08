@@ -3,6 +3,8 @@ const SHEET_ID = "1vSsBLHX2RzL84v_6nIVn4umBt8t5t2sMsSe_WgR9p3M";
 const CATS_TAB = "Kategorier";
 const NEWS_TAB = "Artiklar";
 const SUBS_TAB = "Prenumeranter";
+const FORM_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqBfZ09p5apVdan986Gc__MXEjq56ob-D6zdsodqZxEnYHFf2PirQjfx7fYGHLqYju/exec";
+const EDIT_BASE_URL = "https://nyheter.aspislabb.se/redigera"; // <-- Ändra till din riktiga URL
 
 // =================== ELEMENT ===================
 const loader    = document.getElementById("loader");
@@ -139,24 +141,33 @@ subForm.addEventListener("submit", (e) => {
     return;
   }
 
+  const token = crypto.randomUUID();
+
   const newRow = {
     Namn: name,
     "E-post": email,
     Kategorier: selectedCats.join(", "),
-    Status: "Pending",
-    Token: ""
+    Status: "Aktiv",
+    Token: token
   };
 
   const encoded = Object.entries(newRow)
     .map(([k, v]) => encodeURIComponent(k) + "=" + encodeURIComponent(v))
     .join("&");
 
-  fetch("https://script.google.com/macros/s/AKfycbyqBfZ09p5apVdan986Gc__MXEjq56ob-D6zdsodqZxEnYHFf2PirQjfx7fYGHLqYju/exec", {
+  fetch(FORM_SCRIPT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: encoded
   })
-  .then(r => r.ok ? showAlert("success", "Tack! Du är nu prenumerant.") : showAlert("error", "Något gick fel."))
+  .then(r => {
+    if (r.ok) {
+      const editLink = `${EDIT_BASE_URL}?token=${token}`;
+      showAlert("success", `Tack! Du är nu prenumerant. <a href='${editLink}' class='underline ml-1'>Hantera prenumeration</a>`);
+    } else {
+      showAlert("error", "Något gick fel.");
+    }
+  })
   .catch(() => showAlert("error", "Nätverksfel. Försök igen."));
 });
 
@@ -167,6 +178,6 @@ function showAlert(type, msg) {
     error:   "bg-red-100 text-red-700"
   };
   alertBox.className = `${styles[type]} mb-4 p-3 rounded`;
-  alertBox.textContent = msg;
+  alertBox.innerHTML = msg;
   alertBox.classList.remove("hidden");
 }
