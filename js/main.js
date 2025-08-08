@@ -31,6 +31,15 @@ Promise.all([
     catSelect.appendChild(opt);
   });
 
+  // Fyll prenumerationsformuläret
+  const catWrap = document.getElementById("cat-boxes");
+  catWrap.innerHTML = categories.map(c =>
+    `<label class="inline-flex items-center mr-4 mt-2">
+       <input type="checkbox" value="${c.Kategori}" class="accent-indigo-600" />
+       <span class="ml-1">${c.Kategori}</span>
+     </label>`
+  ).join("");
+
   renderMore();
 })
 .catch(err => showError("Kunde inte ladda nyheter", err));
@@ -94,25 +103,7 @@ applyBtn.addEventListener("click", () => {
   renderMore();
 });
 
-// ==================== 5. LADDA KATEGORIER I FORMULÄR ====================
-fetch(`${API}/settings`)
-  .then(r => r.json())
-  .then(cats => {
-    const wrap = document.getElementById("cat-boxes");
-    if (!cats.length) {
-      wrap.innerHTML = "<em>Inga kategorier i systemet</em>";
-      return;
-    }
-    wrap.innerHTML = cats.map(c =>
-      `<label class="inline-flex items-center mr-4 mt-2">
-         <input type="checkbox" value="${c.Kategori}" class="accent-indigo-600" />
-         <span class="ml-1">${c.Kategori}</span>
-       </label>`
-    ).join("");
-  })
-  .catch(err => console.error("settings-fel:", err));
-
-// ==================== 6. PRENUMERATION ====================
+// ==================== 5. PRENUMERATION ====================
 document.getElementById("sub-form").addEventListener("submit", async e => {
   e.preventDefault();
   const fd   = new FormData(e.target);
@@ -144,7 +135,7 @@ document.getElementById("sub-form").addEventListener("submit", async e => {
   }
 });
 
-// ==================== 7. HJÄLPFUNKTIONER ====================
+// ==================== 6. HJÄLPFUNKTIONER ====================
 function toggleAlert(type, msg) {
   const styles = {
     info:    "bg-blue-100 text-blue-700",
