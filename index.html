@@ -10,100 +10,73 @@
     tailwind.config = { darkMode: "class" };
   </script>
 
+  <!-- Egna overrides -->
   <link rel="stylesheet" href="css/styles.css" />
 </head>
-
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 leading-relaxed">
 
   <!-- ===== HEADER ===== -->
   <header class="py-6 text-center flex flex-col items-center gap-2">
     <h1 class="text-3xl font-bold">AI-Nyheter</h1>
-    <p class="text-gray-600 dark:text-gray-400">Snabbt sammanfattade nyheter om artificiell intelligens</p>
-
-    <button id="toggle-dark"
-            class="mt-2 text-sm px-4 py-1 rounded border border-gray-400 dark:border-gray-500
-                   hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1">
-      <span id="toggle-icon">🌙</span> Växla tema
+    <p class="text-gray-600 dark:text-gray-400">
+      Snabbt sammanfattade nyheter om artificiell intelligens
+    </p>
+    <button id="toggle-dark" class="mt-2 text-sm px-4 py-1 rounded border border-gray-400 dark:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-1">
+      <span id="toggle-icon">🌙</span>
+      Växla tema
     </button>
   </header>
 
-  <!-- ===== MAIN INNEHÅLL ===== -->
-  <main class="max-w-4xl mx-auto px-4">
+  <!-- ===== SÖK & FILTER ===== -->
+  <section class="max-w-3xl mx-auto px-4 mb-6 flex flex-wrap items-center gap-3 justify-between">
+    <select id="catSelect" class="border rounded p-2 dark:bg-gray-700 dark:border-gray-600">
+      <option value="">Alla kategorier</option>
+    </select>
+    <input type="text" id="search" placeholder="Sök i titlar eller sammanfattningar …" class="flex-1 border rounded p-2 dark:bg-gray-700 dark:border-gray-600" />
+    <button id="apply" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Filtrera</button>
+  </section>
 
-    <!-- === SÖK + FILTER === -->
-    <section class="mb-8">
-      <div class="grid sm:grid-cols-2 gap-4">
-        <select id="catSelect" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600">
-          <option value="">Alla kategorier</option>
-        </select>
+  <!-- ===== LOADER ===== -->
+  <div id="loader" class="flex justify-center my-8">
+    <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+    </svg>
+  </div>
 
-        <input id="search" type="search" placeholder="Sök i titlar eller sammanfattningar …"
-               class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600" />
-      </div>
-      <button id="apply"
-              class="w-full mt-4 px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">
-        Filtrera
-      </button>
-    </section>
-
-    <!-- === LOADER === -->
-    <div id="loader" class="flex justify-center my-8">
-      <svg class="animate-spin h-8 w-8 text-indigo-600" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10"
-                stroke="currentColor" stroke-width="4" fill="none"/>
-        <path class="opacity-75" fill="currentColor"
-              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
-      </svg>
-    </div>
-
-    <!-- === NYHETER === -->
-    <section id="news" class="hidden">
+  <!-- ===== HUVUDINNEHÅLL ===== -->
+  <main class="max-w-3xl mx-auto px-4">
+    <section id="news" class="mb-12 hidden">
       <h2 class="text-xl font-semibold mb-4">Senaste nyheterna</h2>
-      <div id="news-list" class="grid gap-4 sm:grid-cols-2"></div>
-      <button id="load" class="mt-6 px-4 py-2 rounded bg-indigo-600 text-white hidden">
-        Läs in fler
-      </button>
+      <div id="news-list" class="grid gap-4"></div>
+      <button id="load" class="mt-6 block mx-auto bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Ladda fler</button>
     </section>
 
-    <!-- === PRENUMERATION === -->
-    <section id="subscribe" class="mt-12 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+    <!-- PRENUMERATION -->
+    <section id="subscribe" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
       <h2 class="text-xl font-semibold mb-4">Prenumerera</h2>
       <div id="alert" class="hidden mb-4 p-3 rounded"></div>
-
       <form id="sub-form" class="space-y-4">
-        <input type="text" name="name" placeholder="Namn"
-               class="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600" required />
-
-        <input type="email" name="email" placeholder="E-post"
-               class="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600" required />
-
+        <input type="text" name="name" placeholder="Namn" class="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600" required />
+        <input type="email" name="email" placeholder="E-post" class="w-full border rounded p-2 dark:bg-gray-700 dark:border-gray-600" required />
         <fieldset id="cat-boxes" class="border rounded p-3 dark:border-gray-600">
           <legend class="font-medium text-sm">Välj kategorier</legend>
-          <!-- Checkboxar fylls via script -->
         </fieldset>
-
-        <button type="submit"
-                class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
-          Prenumerera
-        </button>
+        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Prenumerera</button>
       </form>
     </section>
   </main>
 
-  <!-- ===== SCRIPT ===== -->
+  <!-- ===== DARK-MODE & SCRIPT ===== -->
   <script src="js/main.js" defer></script>
-
   <script>
     const html  = document.documentElement;
     const btn   = document.getElementById("toggle-dark");
     const icon  = document.getElementById("toggle-icon");
-
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     if (localStorage.theme === "dark" || (!localStorage.theme && prefersDark)) {
-      html.classList.add("dark");
-      icon.textContent = "☀️";
+      html.classList.add("dark"); icon.textContent = "☀️";
     }
-
     btn.addEventListener("click", () => {
       html.classList.toggle("dark");
       const isDark = html.classList.contains("dark");
